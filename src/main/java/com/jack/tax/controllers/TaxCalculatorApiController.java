@@ -1,6 +1,10 @@
 package com.jack.tax.controllers;
 
-import com.jack.tax.models.*;
+import com.jack.tax.models.BracketDetails;
+import com.jack.tax.models.FilingStatus;
+import com.jack.tax.models.StandardDeductionDetails;
+import com.jack.tax.models.InputModel;
+import com.jack.tax.models.interfaces.FilingStatusResponse;
 import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
@@ -63,7 +67,7 @@ public class TaxCalculatorApiController {
     public List<FilingStatusResponse> getFilingStatuses() {
 
         return Arrays.stream(FilingStatus.values())
-                .map(FilingStatusResponse::new)
+                .map(com.jack.tax.models.FilingStatusResponse::new)
                 .collect(Collectors.toList());
     }
 
