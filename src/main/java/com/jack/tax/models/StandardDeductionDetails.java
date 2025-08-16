@@ -43,46 +43,42 @@ public class StandardDeductionDetails {
         // No processing required
     }
 
+    /**
+     * Returns the tax year applicable to the standard deduction
+     */
     public int getTaxYear() {
         return taxYear;
     }
 
-    public void setTaxYear(int taxYear) {
-        this.taxYear = taxYear;
-    }
-
+    /**
+     * Returns the standard deduction (USD) for a single filer
+     */
     public int getSingle() {
         return single;
     }
 
-    public void setSingle(int single) {
-        this.single = single;
-    }
+    /**
+     * Returns the standard deduction (USD) for married-filing-jointly filers
+     */
+    public int getMfj() { return mfj; }
 
-    public int getMfj() {
-        return mfj;
-    }
-
-    public void setMfj(int mfj) {
-        this.mfj = mfj;
-    }
-
+    /**
+     * Returns the standard deduction (USD) for a married-filing-separately filer
+     */
     public int getMfs() {
         return mfs;
     }
 
-    public void setMfs(int mfs) {
-        this.mfs = mfs;
-    }
-
+    /**
+     * Returns the standard deduction (USD) for a head-of-household filer
+     */
     public int getHoh() {
         return hoh;
     }
 
-    public void setHoh(int hoh) {
-        this.hoh = hoh;
-    }
-
+    /**
+     * Returns the string representation of a standard deduction details instance.
+     */
     @Override
     public String toString() {
         return "StandardDeductionDetails{" +
@@ -94,6 +90,11 @@ public class StandardDeductionDetails {
                 '}';
     }
 
+    /**
+     * Determines if this standard deduction details instance is considered equal to the other one.
+     * @param o Other standard deduction details instance
+     * @return True if equal, otherwise false
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -101,6 +102,9 @@ public class StandardDeductionDetails {
         return taxYear == that.taxYear && single == that.single && mfj == that.mfj && mfs == that.mfs && hoh == that.hoh;
     }
 
+    /**
+     * Uses this standard deduction details instance's fields to compute and return a hash code.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(taxYear, single, mfj, mfs, hoh);
