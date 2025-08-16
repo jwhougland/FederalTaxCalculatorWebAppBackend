@@ -1,8 +1,6 @@
 package com.jack.tax.controllers;
 
-import com.jack.tax.models.BracketDetails;
-import com.jack.tax.models.StandardDeductionDetails;
-import com.jack.tax.models.InputModel;
+import com.jack.tax.models.*;
 import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
@@ -14,7 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * API controller for receiving tax calculation requests and
@@ -57,6 +57,30 @@ public class TaxCalculatorApiController {
     }
 
     /**
+     * Returns a list of filing statuses so the user can pick one.
+     */
+    @GetMapping("/filingStatuses")
+    public List<FilingStatusResponse> getFilingStatuses() {
+
+        return Arrays.stream(FilingStatus.values())
+                .map(FilingStatusResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Calculates federal tax owed based on the given input data.
+     *
+     * @param inputModel Encapsulates user entered data about gross income,
+     *                  filing status, deductions, and credits for a specified tax year.
+     * @return Federal tax owed (USD), marginal tax rate (%), effective tax rate (%), take home pay (USD).
+     */
+    @PostMapping("/taxCalculation")
+    public OutputModel calculateFederalTaxOwed(@RequestBody InputModel inputModel) {
+
+        return new com.jack.tax.models.OutputModel();
+    }
+
+    /**
      * Returns standard deduction data for all tax years in persistent storage
      */
     @GetMapping("/standarddeductions")
@@ -72,18 +96,5 @@ public class TaxCalculatorApiController {
 
         List<BracketDetails> details = bracketRepository.findAll();
         return details;
-    }
-
-    /**
-     * Calculates federal tax owed based on the given input data.
-     *
-     * @param inputModel Encapsulates user entered data about gross income,
-     *                  filing status, deductions, and credits for a specified tax year.
-     * @return Federal tax owed (USD), marginal tax rate (%), effective tax rate (%), take home pay (USD).
-     */
-    @PostMapping("/taxCalculation")
-    public OutputModel calculateFederalTaxOwed(@RequestBody InputModel inputModel) {
-
-        return new com.jack.tax.models.OutputModel();
     }
 }
