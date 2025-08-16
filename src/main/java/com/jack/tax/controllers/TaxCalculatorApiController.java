@@ -8,6 +8,7 @@ import com.jack.tax.models.interfaces.FilingStatusResponse;
 import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -79,7 +80,7 @@ public class TaxCalculatorApiController {
      * @return Federal tax owed (USD), marginal tax rate (%), effective tax rate (%), take home pay (USD).
      */
     @PostMapping("/taxCalculation")
-    public OutputModel calculateFederalTaxOwed(@RequestBody InputModel inputModel) {
+    public OutputModel calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
 
         return new com.jack.tax.models.OutputModel();
     }

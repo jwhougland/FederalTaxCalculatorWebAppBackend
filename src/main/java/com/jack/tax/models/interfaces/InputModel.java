@@ -14,6 +14,7 @@ public interface InputModel {
 
     /**
      * Sets the gross income (USD) before any taxes / withholdings.
+     *
      * @param grossIncome User-entered gross income (USD)
      */
     public void setGrossIncome(double grossIncome);
@@ -25,9 +26,10 @@ public interface InputModel {
 
     /**
      * Sets the filing status
-     * @param filingStatus User-entered filing status
+     *
+     * @param selectedFilingStatus User-entered filing status
      */
-    public void setSelectedFilingStatus(FilingStatus filingStatus);
+    public void setSelectedFilingStatus(FilingStatus selectedFilingStatus);
 
     /**
      * Returns the selected tax year
@@ -36,9 +38,10 @@ public interface InputModel {
 
     /**
      * Sets the tax year
-     * @param taxYear User-entered tax year
+     *
+     * @param selectedTaxYear User-entered tax year
      */
-    public void setSelectedTaxYear(int taxYear);
+    public void setSelectedTaxYear(int selectedTaxYear);
 
     /**
      * Returns the total deductions (USD) the user has entered.
@@ -47,6 +50,7 @@ public interface InputModel {
 
     /**
      * Sets the total deductions (USD)
+     *
      * @param totalDeductions User-entered total deductions (USD)
      */
     public void setTotalDeductions(double totalDeductions);
@@ -58,6 +62,7 @@ public interface InputModel {
 
     /**
      * Sets the total credits (USD)
+     *
      * @param totalCredits User-entered total credits (USD)
      */
     public void setTotalCredits(double totalCredits);
