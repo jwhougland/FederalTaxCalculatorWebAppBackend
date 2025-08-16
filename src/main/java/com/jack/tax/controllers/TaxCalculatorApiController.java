@@ -8,6 +8,7 @@ import com.jack.tax.models.interfaces.FilingStatusResponse;
 import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
+import com.jack.tax.services.TaxCalculationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,16 +32,19 @@ import java.util.stream.Collectors;
 public class TaxCalculatorApiController {
 
     /**
-     * Used to perform CRUD operations on standard deduction entities
+     * Contains the business logic for tax calculations.
      */
-    @Autowired
-    private StandardDeductionRepository standardDeductionRepository;
+    private final TaxCalculationService taxCalculationService;
 
     /**
-     * Used to perform CRUD operations on bracket entities
+     * Creates a fully initialized Tax Calculator API Controller using the given data.
+     *
+     * @param taxCalculationService Contains the business logic for tax calculations.
      */
     @Autowired
-    private BracketRepository bracketRepository;
+    public TaxCalculatorApiController(TaxCalculationService taxCalculationService) {
+        this.taxCalculationService = taxCalculationService;
+    }
 
     /**
      * Returns the tax years the app supports based on what is loaded in persistent storage.
@@ -48,17 +52,7 @@ public class TaxCalculatorApiController {
     @GetMapping("/taxYears")
     public List<Integer> getTaxYears() {
 
-        List<Integer> taxYears = new ArrayList<>();
-
-        // Query persistent storage for the standard deduction entities because there will be one for each tax year
-        // supported by this app
-        List<StandardDeductionDetails> standardDeductionDetails = standardDeductionRepository.findAll();
-
-        // Iterate over the standard deduction entities and use its tax year field to build up the collection
-        // returned by this method
-        standardDeductionDetails.forEach(sd -> taxYears.add(sd.getTaxYear()));
-
-        return taxYears;
+        return taxCalculationService.getSupportedTaxYears();
     }
 
     /**
@@ -85,21 +79,21 @@ public class TaxCalculatorApiController {
         return new com.jack.tax.models.OutputModel();
     }
 
-    /**
-     * Returns standard deduction data for all tax years in persistent storage
-     */
-    @GetMapping("/standarddeductions")
-    public List<StandardDeductionDetails> getStandardDeductions() {
-        return standardDeductionRepository.findAll();
-    }
+    ///**
+    // * Returns standard deduction data for all tax years in persistent storage
+    // */
+    //@GetMapping("/standarddeductions")
+    //public List<StandardDeductionDetails> getStandardDeductions() {
+    //    return standardDeductionRepository.findAll();
+    //}
 
-    /**
-     * Returns bracket details for all tax years in persistent storage
-     */
-    @GetMapping("/bracketdetails")
-    public List<BracketDetails> getBracketDetails() {
+    ///**
+    // * Returns bracket details for all tax years in persistent storage
+    // */
+    //@GetMapping("/bracketdetails")
+    //public List<BracketDetails> getBracketDetails() {
 
-        List<BracketDetails> details = bracketRepository.findAll();
-        return details;
-    }
+    //    List<BracketDetails> details = bracketRepository.findAll();
+    //    return details;
+    //}
 }
