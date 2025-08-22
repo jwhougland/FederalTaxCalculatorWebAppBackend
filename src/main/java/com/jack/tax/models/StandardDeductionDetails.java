@@ -9,7 +9,7 @@ import java.util.Objects;
  * for the various filing options.
  */
 @Document(collection = "StandardDeductions")
-public class StandardDeductionDetails {
+public class StandardDeductionDetails implements com.jack.tax.models.interfaces.StandardDeductionDetails {
 
     /**
      * Applicable tax year for the standard deduction details
