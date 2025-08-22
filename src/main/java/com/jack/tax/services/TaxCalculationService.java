@@ -92,7 +92,6 @@ public class TaxCalculationService {
             com.jack.tax.models.interfaces.BracketDetails bracketDetailsForIndex = taxYearDetails
                     .getBracketDetails().get(bracketIndex);
 
-
             // Get the applicable income (USD) for the current bracket
             double applicableIncomeForBracket = getApplicableIncomeForBracket(
                     inputModel.getSelectedFilingStatus(),
