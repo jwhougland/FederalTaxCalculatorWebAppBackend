@@ -1,13 +1,9 @@
 package com.jack.tax.controllers;
 
-import com.jack.tax.models.BracketDetails;
 import com.jack.tax.models.FilingStatus;
-import com.jack.tax.models.StandardDeductionDetails;
 import com.jack.tax.models.InputModel;
 import com.jack.tax.models.interfaces.FilingStatusResponse;
 import com.jack.tax.models.interfaces.OutputModel;
-import com.jack.tax.repositories.BracketRepository;
-import com.jack.tax.repositories.StandardDeductionRepository;
 import com.jack.tax.services.TaxCalculationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -76,24 +71,6 @@ public class TaxCalculatorApiController {
     @PostMapping("/taxCalculation")
     public OutputModel calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
 
-        return new com.jack.tax.models.OutputModel();
+        return taxCalculationService.calculateTaxes(inputModel);
     }
-
-    ///**
-    // * Returns standard deduction data for all tax years in persistent storage
-    // */
-    //@GetMapping("/standarddeductions")
-    //public List<StandardDeductionDetails> getStandardDeductions() {
-    //    return standardDeductionRepository.findAll();
-    //}
-
-    ///**
-    // * Returns bracket details for all tax years in persistent storage
-    // */
-    //@GetMapping("/bracketdetails")
-    //public List<BracketDetails> getBracketDetails() {
-
-    //    List<BracketDetails> details = bracketRepository.findAll();
-    //    return details;
-    //}
 }
