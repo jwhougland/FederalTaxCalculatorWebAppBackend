@@ -73,22 +73,4 @@ public class TaxCalculatorApiController {
 
         return taxCalculationService.calculateTaxes(inputModel);
     }
-
-    ///**
-    // * Returns standard deduction data for all tax years in persistent storage
-    // */
-    //@GetMapping("/standarddeductions")
-    //public List<StandardDeductionDetails> getStandardDeductions() {
-    //    return standardDeductionRepository.findAll();
-    //}
-
-    ///**
-    // * Returns bracket details for all tax years in persistent storage
-    // */
-    //@GetMapping("/bracketdetails")
-    //public List<BracketDetails> getBracketDetails() {
-
-    //    List<BracketDetails> details = bracketRepository.findAll();
-    //    return details;
-    //}
 }
