@@ -136,6 +136,6 @@ public class BracketDetails implements com.jack.tax.models.interfaces.BracketDet
      */
     @Override
     public int getMaxIncomeHOH() {
-        return minIncomeHOH;
+        return maxIncomeHOH;
     }
 }
