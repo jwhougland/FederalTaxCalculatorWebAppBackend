@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,8 +70,9 @@ public class TaxCalculatorApiController {
      * @return Federal tax owed (USD), marginal tax rate (%), effective tax rate (%), take home pay (USD).
      */
     @PostMapping("/taxCalculation")
-    public OutputModel calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
+    public List<OutputModel> calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
 
-        return taxCalculationService.calculateTaxes(inputModel);
+        // Return a list with one and only one element with tax calculation output content
+        return Collections.singletonList(taxCalculationService.calculateTaxes(inputModel));
     }
 }
