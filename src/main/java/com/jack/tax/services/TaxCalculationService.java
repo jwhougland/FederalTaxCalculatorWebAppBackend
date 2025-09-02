@@ -11,6 +11,8 @@ import com.jack.tax.repositories.StandardDeductionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -114,13 +116,25 @@ public class TaxCalculationService {
         // Lastly, apply the tax credits to offset the federal tax owed amount
         federalTaxOwed -= inputModel.getTotalCredits();
 
+        // Perform some set up for rounding the federal tax owed and setting the precision to 2
+        BigDecimal federalTaxOwedBigDecimal = new BigDecimal(Double.toString(federalTaxOwed));
+        federalTaxOwedBigDecimal = federalTaxOwedBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
+
+        // Perform some set up for rounding the effective tax rate and setting the precision to 2
+        BigDecimal effectiveTaxRateBigDecimal = new BigDecimal(Double.toString((federalTaxOwed / inputModel.getGrossIncome()) * 100.0));
+        effectiveTaxRateBigDecimal = effectiveTaxRateBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
+
+        // Perform some set up for rounding the take home pay and setting the precision to 2
+        BigDecimal takeHomePayBigDecimal = new BigDecimal(Double.toString(inputModel.getGrossIncome() - federalTaxOwed));
+        takeHomePayBigDecimal = takeHomePayBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
+
         // Initialize and populate an output tax model
         OutputModel outputModel = new com.jack.tax.models.OutputModel();
         outputModel.setTaxYear(inputModel.getSelectedTaxYear());
-        outputModel.setFederalTaxOwed(federalTaxOwed);
+        outputModel.setFederalTaxOwed(federalTaxOwedBigDecimal.doubleValue());
         outputModel.setMarginalTaxRate(taxYearDetails.getBracketDetails().get(maxTaxBracketIndex).getTaxRate());
-        outputModel.setEffectiveTaxRate((federalTaxOwed / inputModel.getGrossIncome()) * 100.0);
-        outputModel.setTakeHomePay(inputModel.getGrossIncome() - federalTaxOwed);
+        outputModel.setEffectiveTaxRate(effectiveTaxRateBigDecimal.doubleValue());
+        outputModel.setTakeHomePay(takeHomePayBigDecimal.doubleValue());
         return outputModel;
     }
 
