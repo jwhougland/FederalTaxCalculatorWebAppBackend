@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -58,6 +59,9 @@ public class TaxCalculationService {
         // Iterate over the standard deduction entities and use its tax year field to build up the collection
         // returned by this method
         standardDeductionDetails.forEach(sd -> taxYears.add(sd.getTaxYear()));
+
+        // Sort the tax years in descending order
+        taxYears.sort(Collections.reverseOrder());
 
         return taxYears;
     }
