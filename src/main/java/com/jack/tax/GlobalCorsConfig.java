@@ -1,4 +1,4 @@
-package com.amortizationscheduler.demo;
+package com.jack.tax;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
