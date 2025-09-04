@@ -121,7 +121,12 @@ public class TaxCalculationService {
         federalTaxOwedBigDecimal = federalTaxOwedBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
 
         // Perform some set up for rounding the effective tax rate and setting the precision to 2
-        BigDecimal effectiveTaxRateBigDecimal = new BigDecimal(Double.toString((federalTaxOwed / inputModel.getGrossIncome()) * 100.0));
+        BigDecimal effectiveTaxRateBigDecimal = null;
+        if (inputModel.getGrossIncome() == 0) {
+            effectiveTaxRateBigDecimal = new BigDecimal("0.0");
+        } else {
+            effectiveTaxRateBigDecimal = new BigDecimal(Double.toString((federalTaxOwed / inputModel.getGrossIncome()) * 100.0));
+        }
         effectiveTaxRateBigDecimal = effectiveTaxRateBigDecimal.setScale(2, RoundingMode.HALF_EVEN);
 
         // Perform some set up for rounding the take home pay and setting the precision to 2
