@@ -51,6 +51,14 @@ public class StandardDeductionDetails implements com.jack.tax.models.interfaces.
     }
 
     /**
+     * Sets the tax year using the given data
+     * @param taxYear Tax year to set
+     */
+    public void setTaxYear(int taxYear) {
+        this.taxYear = taxYear;
+    }
+
+    /**
      * Returns the standard deduction (USD) for a single filer
      */
     public int getSingle() {
@@ -58,9 +66,27 @@ public class StandardDeductionDetails implements com.jack.tax.models.interfaces.
     }
 
     /**
+     * Sets the standard deduction (USD) for a single filer
+     * @param single Standard deduction amount (USD) to set
+     */
+    public void setSingle(int single) {
+        this.single = single;
+    }
+
+    /**
      * Returns the standard deduction (USD) for married-filing-jointly filers
      */
-    public int getMfj() { return mfj; }
+    public int getMfj() {
+        return mfj;
+    }
+
+    /**
+     * Sets the standard deduction (USD) for married-filing-jointly filers
+     * @param mfj Standard deduction amount (USD) to set
+     */
+    public void setMfj(int mfj) {
+        this.mfj = mfj;
+    }
 
     /**
      * Returns the standard deduction (USD) for a married-filing-separately filer
@@ -70,10 +96,26 @@ public class StandardDeductionDetails implements com.jack.tax.models.interfaces.
     }
 
     /**
+     * Sets the standard deduction (USD) for a married-filing-separately filer
+     * @param mfs Standard deduction amount (USD) to set
+     */
+    public void setMfs(int mfs) {
+        this.mfs = mfs;
+    }
+
+    /**
      * Returns the standard deduction (USD) for a head-of-household filer
      */
     public int getHoh() {
         return hoh;
+    }
+
+    /**
+     * Sets the standard deduction (USD) for a head-of-household filer
+     * @param hoh Standard deduction amount (USD) to set
+     */
+    public void setHoh(int hoh) {
+        this.hoh = hoh;
     }
 
     /**
@@ -109,4 +151,5 @@ public class StandardDeductionDetails implements com.jack.tax.models.interfaces.
     public int hashCode() {
         return Objects.hash(taxYear, single, mfj, mfs, hoh);
     }
+
 }
