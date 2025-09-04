@@ -7,6 +7,7 @@ import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.services.TaxCalculationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,9 +71,9 @@ public class TaxCalculatorApiController {
      * @return Federal tax owed (USD), marginal tax rate (%), effective tax rate (%), take home pay (USD).
      */
     @PostMapping("/taxCalculation")
-    public List<OutputModel> calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
+    public ResponseEntity<List<OutputModel>> calculateFederalTaxOwed(@Valid @RequestBody InputModel inputModel) {
 
         // Return a list with one and only one element with tax calculation output content
-        return Collections.singletonList(taxCalculationService.calculateTaxes(inputModel));
+        return ResponseEntity.ok(Collections.singletonList(taxCalculationService.calculateTaxes(inputModel)));
     }
 }

@@ -1,33 +1,33 @@
 package com.jack.tax.models;
 
 import com.jack.tax.utils.AppConstants;
-import jakarta.persistence.Entity;
 import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.*;
 
 /**
  * Contains the user-entered inputs needed to get tax calculations started.
  */
-@Entity
 @NoArgsConstructor
 public class InputModel implements com.jack.tax.models.interfaces.InputModel {
 
     @DecimalMin(value = AppConstants.MIN_USD_AMOUNT_AS_STR, message = "Gross income must be at least " + AppConstants.MIN_USD_AMOUNT_AS_STR)
     @DecimalMax(value = AppConstants.MAX_USD_AMOUNT_AS_STR, message = "Gross income must be less than or equal to " + AppConstants.MAX_USD_AMOUNT_AS_STR)
+    @Digits(integer = AppConstants.MAX_DIGITS_BEFORE_DECIMAL_POINT, fraction = AppConstants.MAX_PRECISION, message = "Must be a valid monetary amount")
     private double grossIncome;
 
     @NotNull(message = "Filing status must have a value")
     private FilingStatus selectedFilingStatus;
 
-    @NotNull(message = "Tax year must have a value")
     private int selectedTaxYear;
 
     @DecimalMin(value = AppConstants.MIN_USD_AMOUNT_AS_STR, message = "Deductions must be at least " + AppConstants.MIN_USD_AMOUNT_AS_STR)
     @DecimalMax(value = AppConstants.MAX_USD_AMOUNT_AS_STR, message = "Deductions must be less than or equal to " + AppConstants.MAX_USD_AMOUNT_AS_STR)
+    @Digits(integer = AppConstants.MAX_DIGITS_BEFORE_DECIMAL_POINT, fraction = AppConstants.MAX_PRECISION, message = "Must be a valid monetary amount")
     private double totalDeductions;
 
     @DecimalMin(value = AppConstants.MIN_USD_AMOUNT_AS_STR, message = "Credits must be at least " + AppConstants.MIN_USD_AMOUNT_AS_STR)
     @DecimalMax(value = AppConstants.MAX_USD_AMOUNT_AS_STR, message = "Credits must be less than or equal to " + AppConstants.MAX_USD_AMOUNT_AS_STR)
+    @Digits(integer = AppConstants.MAX_DIGITS_BEFORE_DECIMAL_POINT, fraction = AppConstants.MAX_PRECISION, message = "Must be a valid monetary amount")
     private double totalCredits;
 
     /**
