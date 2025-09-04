@@ -47,20 +47,20 @@ public class TaxCalculatorApiController {
      * Returns the tax years the app supports based on what is loaded in persistent storage.
      */
     @GetMapping("/taxYears")
-    public List<Integer> getTaxYears() {
+    public ResponseEntity<List<Integer>> getTaxYears() {
 
-        return taxCalculationService.getSupportedTaxYears();
+        return ResponseEntity.ok(taxCalculationService.getSupportedTaxYears());
     }
 
     /**
      * Returns a list of filing statuses so the user can pick one.
      */
     @GetMapping("/filingStatuses")
-    public List<FilingStatusResponse> getFilingStatuses() {
+    public ResponseEntity<List<FilingStatusResponse>> getFilingStatuses() {
 
-        return Arrays.stream(FilingStatus.values())
+        return ResponseEntity.ok(Arrays.stream(FilingStatus.values())
                 .map(com.jack.tax.models.FilingStatusResponse::new)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()));
     }
 
     /**
