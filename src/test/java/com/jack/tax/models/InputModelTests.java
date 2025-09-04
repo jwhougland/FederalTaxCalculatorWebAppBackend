@@ -63,6 +63,11 @@ public class InputModelTests {
     private static final String TOTAL_CREDITS_FIELD = "totalCredits";
 
     /**
+     * Field name - selectedFilingStatus
+     */
+    private static final String SELECTED_FILING_STATUS_FIELD = "selectedFilingStatus";
+
+    /**
      * Sets up the instance validator field in a consistent way for each test
      */
     @BeforeAll
@@ -284,6 +289,28 @@ public class InputModelTests {
         Set<ConstraintViolation<InputModel>> updatedViolations = validator.validate(inputModel);
         assertFalse(updatedViolations.isEmpty());
         assertTrue(hasValidationIssueForField(updatedViolations, TOTAL_CREDITS_FIELD));
+    }
+
+    /**
+     * Verifies that a validation issue will be reported when the filing status is null.
+     */
+    @Test
+    public void testValidationWorksForNullFilingStatus() {
+
+        // Create an instance of the class under test with valid values
+        InputModel inputModel = createInputModelWithValidValues();
+
+        // Run an initial validation.  Everything should pass.
+        Set<ConstraintViolation<InputModel>> initialViolations = validator.validate(inputModel);
+        assertTrue(initialViolations.isEmpty());
+
+        // Attempt to set the filing status to null
+        inputModel.setSelectedFilingStatus(null);
+
+        // Run an updated validation.  There should be a problem.
+        Set<ConstraintViolation<InputModel>> updatedViolations = validator.validate(inputModel);
+        assertFalse(updatedViolations.isEmpty());
+        assertTrue(hasValidationIssueForField(updatedViolations, SELECTED_FILING_STATUS_FIELD));
     }
 
     /**
