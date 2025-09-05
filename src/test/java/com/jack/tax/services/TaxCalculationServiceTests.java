@@ -96,6 +96,12 @@ public class TaxCalculationServiceTests {
         assertIterableEquals(expectedTaxYearDetails.getBracketDetails(), actualTaxYearDetails.getBracketDetails());
     }
 
+    /**
+     * Verifies that the expected standard deduction amount (USD) is returned based on the given data
+     *
+     * @param taxYear       Tax year
+     * @param filingStatus  Filing status
+     */
     @ParameterizedTest
     @CsvSource({
         "2024, SINGLE",
@@ -188,6 +194,59 @@ public class TaxCalculationServiceTests {
 
         // Verify the actual taxable income equals the expected amount
         assertEquals(expectedTaxableIncome, actualTaxableIncome, 0.01);
+    }
+
+    /**
+     * Verifies that the expected max income is returned for each tax bracket for a given year and filing status
+     *
+     * @param taxYear       Tax year
+     * @param filingStatus  Filing status
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "2024, SINGLE",
+            "2024, MARRIED_FILING_JOINTLY",
+            "2024, SURVIVING_SPOUSE",
+            "2024, MARRIED_FILING_SEPARATELY",
+            "2024, HEAD_OF_HOUSEHOLD",
+            "2025, SINGLE",
+            "2025, MARRIED_FILING_JOINTLY",
+            "2025, SURVIVING_SPOUSE",
+            "2025, MARRIED_FILING_SEPARATELY",
+            "2025, HEAD_OF_HOUSEHOLD"
+    })
+    public void getMaxIncomeForBracket_returnsExpectedStandardDeduction(int taxYear, FilingStatus filingStatus) {
+
+        // Search for the tax brackets applicable to the given tax year, and
+        // sort in ascending order based on the marginal tax rate
+        List<? extends com.jack.tax.models.interfaces.BracketDetails> allBracketDetails = createMockedBracketDetails()
+                .stream()
+                .filter(bd -> bd.getTaxYear() == taxYear)
+                .sorted(Comparator.comparingInt(BracketDetails::getTaxRate))
+                .toList();
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        // Iterate through the bracket details applicable to the given tax year
+        for (com.jack.tax.models.interfaces.BracketDetails individualBracketDetails : allBracketDetails) {
+
+            // Call the method under test to get the actual max income for a bracket
+            double actualMaxIncomeForBracket = taxCalculationService
+                    .getMaxIncomeForBracket(filingStatus, individualBracketDetails);
+
+            // Take action with the max income for bracket verification based on the filing status
+            switch(filingStatus) {
+                case FilingStatus.SINGLE ->
+                    assertEquals(individualBracketDetails.getMaxIncomeSingle(), actualMaxIncomeForBracket);
+                case FilingStatus.MARRIED_FILING_JOINTLY, FilingStatus.SURVIVING_SPOUSE ->
+                    assertEquals(individualBracketDetails.getMaxIncomeMFJ(), actualMaxIncomeForBracket);
+                case FilingStatus.MARRIED_FILING_SEPARATELY ->
+                    assertEquals(individualBracketDetails.getMaxIncomeMFS(), actualMaxIncomeForBracket);
+                case FilingStatus.HEAD_OF_HOUSEHOLD ->
+                    assertEquals(individualBracketDetails.getMaxIncomeHOH(), actualMaxIncomeForBracket);
+            }
+        }
     }
 	
     /**
