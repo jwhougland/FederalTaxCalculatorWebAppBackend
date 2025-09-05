@@ -206,7 +206,8 @@ public class TaxCalculationService {
         // happens to be negative, we'll force taxableIncome to be zero.  We're ignoring the rule
         // about the itemized deduction amount being limited to a certain percentage of income because
         // the real purpose of this app is to provide an approximation, and it is expected that the
-        // user will adhere to entering plausible values.
+        // user will adhere to entering plausible values.  The main point is to avoid a
+        // situation of having this app output that the taxable income is negative.
         taxableIncome = Math.max(0, taxableIncome);
 
         return taxableIncome;
