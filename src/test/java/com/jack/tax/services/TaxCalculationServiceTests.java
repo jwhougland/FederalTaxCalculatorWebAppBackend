@@ -4,6 +4,7 @@ import com.jack.tax.models.BracketDetails;
 import com.jack.tax.models.FilingStatus;
 import com.jack.tax.models.StandardDeductionDetails;
 import com.jack.tax.models.TaxYearDetails;
+import com.jack.tax.models.interfaces.InputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -137,6 +138,56 @@ public class TaxCalculationServiceTests {
             case FilingStatus.HEAD_OF_HOUSEHOLD ->
                     assertEquals(standardDeductionDetails.getHoh(), actualStandardDeduction);
         }
+    }
+
+    /**
+     * Verifies the method under test returns the expected taxable income (USD) using the given inputs
+     *
+     * @param taxYear                 Tax year
+     * @param grossIncome             Gross income (USD)
+     * @param totalDeductions         Total deductions (USD)
+     * @param filingStatus            Filing status enum
+     * @param expectedTaxableIncome   Expected taxable income (USD)
+     */
+    @ParameterizedTest
+    @CsvSource({
+            // taxYear, grossIncome, totalDeductions, filingStatus, expectedTaxableIncome
+            "2024, 50000, 10000, SINGLE, 35400",  // Standard deduction is better
+            "2024, 50000, 20000, SINGLE, 30000",  // Itemizing is better
+            "2024, 10000, 5000, SINGLE, 0",       // Gross income less than standard deduction
+            "2024, 10000, 15000, SINGLE, 0",      // Gross income minus deductions less than 0
+            "2025, 60000, 20000, MARRIED_FILING_JOINTLY, 28500",  // Standard deduction is better
+            "2025, 50000, 40000, SINGLE, 10000"                   // Itemizing is better
+    })
+    public void getTaxableIncome_shouldReturnCorrectAmount(
+            int taxYear,
+            double grossIncome,
+            double totalDeductions,
+            FilingStatus filingStatus,
+            double expectedTaxableIncome) {
+
+        // Create an input model that will be provided as an input to the method under test
+        InputModel input = new com.jack.tax.models.InputModel();
+        input.setGrossIncome(grossIncome);
+        input.setTotalDeductions(totalDeductions);
+        input.setSelectedFilingStatus(filingStatus);
+
+        // Get standard deduction details that will be provided as an input to the method under test
+        StandardDeductionDetails standardDeductionDetails = createMockedStandardDeductionDetails()
+                .stream()
+                .filter(sd -> sd.getTaxYear() == taxYear)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Could not find expected standard deduction details" +
+                        " for tax year " + taxYear));
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        // Call the method under test
+        double actualTaxableIncome = taxCalculationService.getTaxableIncome(input, standardDeductionDetails);
+
+        // Verify the actual taxable income equals the expected amount
+        assertEquals(expectedTaxableIncome, actualTaxableIncome, 0.01);
     }
 	
     /**
