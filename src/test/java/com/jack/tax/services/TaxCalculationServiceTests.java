@@ -1,6 +1,7 @@
 package com.jack.tax.services;
 
 import com.jack.tax.models.BracketDetails;
+import com.jack.tax.models.FilingStatus;
 import com.jack.tax.models.StandardDeductionDetails;
 import com.jack.tax.models.TaxYearDetails;
 import com.jack.tax.repositories.BracketRepository;
@@ -8,6 +9,7 @@ import com.jack.tax.repositories.StandardDeductionRepository;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -91,6 +93,50 @@ public class TaxCalculationServiceTests {
         assertEquals(expectedTaxYearDetails.getTaxYear(), actualTaxYearDetails.getTaxYear());
         assertEquals(expectedTaxYearDetails.getStandardDeductionDetails(), actualTaxYearDetails.getStandardDeductionDetails());
         assertIterableEquals(expectedTaxYearDetails.getBracketDetails(), actualTaxYearDetails.getBracketDetails());
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "2024, SINGLE",
+        "2024, MARRIED_FILING_JOINTLY",
+        "2024, SURVIVING_SPOUSE",
+        "2024, MARRIED_FILING_SEPARATELY",
+        "2024, HEAD_OF_HOUSEHOLD",
+        "2025, SINGLE",
+        "2025, MARRIED_FILING_JOINTLY",
+        "2025, SURVIVING_SPOUSE",
+        "2025, MARRIED_FILING_SEPARATELY",
+        "2025, HEAD_OF_HOUSEHOLD"
+    })
+    public void getStandardDeductionForFilingStatus_returnsExpectedStandardDeduction(int taxYear, FilingStatus filingStatus) {
+
+        // Get standard deduction details that will be provided as an input to the method under test
+        StandardDeductionDetails standardDeductionDetails = createMockedStandardDeductionDetails()
+                .stream()
+                .filter(sd -> sd.getTaxYear() == taxYear)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Could not find expected standard deduction details" +
+                        " for tax year " + taxYear));
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        // Call the method under test
+        double actualStandardDeduction = taxCalculationService.getStandardDeductionForFilingStatus(
+                filingStatus, standardDeductionDetails);
+
+        // Take action based on the filing status when doing the verification on the standard deduction amount
+        // returned by the method under test
+        switch(filingStatus) {
+            case FilingStatus.SINGLE ->
+                    assertEquals(standardDeductionDetails.getSingle(), actualStandardDeduction);
+            case FilingStatus.MARRIED_FILING_JOINTLY, FilingStatus.SURVIVING_SPOUSE ->
+                    assertEquals(standardDeductionDetails.getMfj(), actualStandardDeduction);
+            case FilingStatus.MARRIED_FILING_SEPARATELY ->
+                    assertEquals(standardDeductionDetails.getMfs(), actualStandardDeduction);
+            case FilingStatus.HEAD_OF_HOUSEHOLD ->
+                    assertEquals(standardDeductionDetails.getHoh(), actualStandardDeduction);
+        }
     }
 	
     /**
