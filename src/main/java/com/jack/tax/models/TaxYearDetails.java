@@ -4,6 +4,7 @@ import com.jack.tax.models.interfaces.BracketDetails;
 import com.jack.tax.models.interfaces.StandardDeductionDetails;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Contains the data and behaviors for the details of an applicable tax year.
@@ -73,5 +74,24 @@ public class TaxYearDetails implements com.jack.tax.models.interfaces.TaxYearDet
     @Override
     public void setBracketDetails(List<BracketDetails> bracketDetails) {
         this.bracketDetails = bracketDetails;
+    }
+
+    /**
+     * Determines if this TaxYearDetails instance is regarded as equal to the other instance
+     * @param o Other TaxYearDetails instance
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        TaxYearDetails that = (TaxYearDetails) o;
+        return taxYear == that.taxYear && Objects.equals(standardDeductionDetails, that.standardDeductionDetails) && Objects.equals(bracketDetails, that.bracketDetails);
+    }
+
+    /**
+     * Computes a hash code for this TaxYearDetails instance
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(taxYear, standardDeductionDetails, bracketDetails);
     }
 }
