@@ -7,6 +7,7 @@ import com.jack.tax.models.TaxYearDetails;
 import com.jack.tax.models.interfaces.InputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -301,7 +302,207 @@ public class TaxCalculationServiceTests {
             }
         }
     }
-	
+
+    /**
+     * Verifies that when the taxable income exceeds the max income for a bracket that the user is
+     * subject to taxation against the whole bracket
+     *
+     * @param taxYear      Tax year
+     * @param filingStatus Filing status
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "2024, SINGLE",
+            "2024, MARRIED_FILING_JOINTLY",
+            "2024, SURVIVING_SPOUSE",
+            "2024, MARRIED_FILING_SEPARATELY",
+            "2024, HEAD_OF_HOUSEHOLD",
+            "2025, SINGLE",
+            "2025, MARRIED_FILING_JOINTLY",
+            "2025, SURVIVING_SPOUSE",
+            "2025, MARRIED_FILING_SEPARATELY",
+            "2025, HEAD_OF_HOUSEHOLD"
+    })
+    public void getApplicableIncomeForBracket_taxableIncomeExceedsMaxBracketIncome_taxedForWholeBracket(
+            int taxYear, FilingStatus filingStatus) {
+
+        // Search for the tax brackets applicable to the given tax year, and
+        // sort in ascending order based on the marginal tax rate
+        List<? extends com.jack.tax.models.interfaces.BracketDetails> allBracketDetails = createMockedBracketDetails()
+                .stream()
+                .filter(bd -> bd.getTaxYear() == taxYear)
+                .sorted(Comparator.comparingInt(BracketDetails::getTaxRate))
+                .toList();
+
+        // Get the first bracket's details
+        com.jack.tax.models.interfaces.BracketDetails firstBracketsDetails = allBracketDetails.get(0);
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        double taxableIncome = 0.0;
+        double expectedTaxableIncomeForBracket = -1.0;
+        double actualTaxableIncomeForBracket = -2.0;
+
+        switch (filingStatus) {
+            case FilingStatus.SINGLE:
+                // Make it so the taxable income exceeds the first bracket's max by one dollar
+                taxableIncome = firstBracketsDetails.getMaxIncomeSingle() + 1.0;
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = firstBracketsDetails.getMaxIncomeSingle() -
+                        firstBracketsDetails.getMinIncomeSingle();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.SINGLE, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.MARRIED_FILING_JOINTLY, FilingStatus.SURVIVING_SPOUSE:
+                // Make it so the taxable income exceeds the first bracket's max by one dollar
+                taxableIncome = firstBracketsDetails.getMaxIncomeMFJ() + 1.0;
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = firstBracketsDetails.getMaxIncomeMFJ() -
+                        firstBracketsDetails.getMinIncomeMFJ();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.MARRIED_FILING_JOINTLY, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.MARRIED_FILING_SEPARATELY:
+                // Make it so the taxable income exceeds the first bracket's max by one dollar
+                taxableIncome = firstBracketsDetails.getMaxIncomeMFS() + 1.0;
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = firstBracketsDetails.getMaxIncomeMFS() -
+                        firstBracketsDetails.getMinIncomeMFS();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.MARRIED_FILING_SEPARATELY, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.HEAD_OF_HOUSEHOLD:
+                // Make it so the taxable income exceeds the first bracket's max by one dollar
+                taxableIncome = firstBracketsDetails.getMaxIncomeHOH() + 1.0;
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = firstBracketsDetails.getMaxIncomeHOH() -
+                    firstBracketsDetails.getMinIncomeHOH();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.HEAD_OF_HOUSEHOLD, firstBracketsDetails, taxableIncome);
+                break;
+        }
+
+        assertEquals(expectedTaxableIncomeForBracket, actualTaxableIncomeForBracket);
+    }
+
+    /**
+     * Verifies that when the taxable income is in the middle of a bracket that the user is
+     * subject to taxation on a prorated basis for the bracket
+     *
+     * @param taxYear      Tax year
+     * @param filingStatus Filing status
+     */
+    @ParameterizedTest
+    @CsvSource({
+            "2024, SINGLE",
+            "2024, MARRIED_FILING_JOINTLY",
+            "2024, SURVIVING_SPOUSE",
+            "2024, MARRIED_FILING_SEPARATELY",
+            "2024, HEAD_OF_HOUSEHOLD",
+            "2025, SINGLE",
+            "2025, MARRIED_FILING_JOINTLY",
+            "2025, SURVIVING_SPOUSE",
+            "2025, MARRIED_FILING_SEPARATELY",
+            "2025, HEAD_OF_HOUSEHOLD"
+    })
+    public void getApplicableIncomeForBracket_taxableIncomeWithinBracket_taxedForProRatedAmountInBracket(
+            int taxYear, FilingStatus filingStatus) {
+
+        // Search for the tax brackets applicable to the given tax year, and
+        // sort in ascending order based on the marginal tax rate
+        List<? extends com.jack.tax.models.interfaces.BracketDetails> allBracketDetails = createMockedBracketDetails()
+                .stream()
+                .filter(bd -> bd.getTaxYear() == taxYear)
+                .sorted(Comparator.comparingInt(BracketDetails::getTaxRate))
+                .toList();
+
+        // Get the first bracket's details
+        com.jack.tax.models.interfaces.BracketDetails firstBracketsDetails = allBracketDetails.get(0);
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        double taxableIncome = 0.0;
+        double expectedTaxableIncomeForBracket = -1.0;
+        double actualTaxableIncomeForBracket = -2.0;
+
+        switch (filingStatus) {
+            case FilingStatus.SINGLE:
+                // Make it so the taxable income exceeds is in the middle of the bracket
+                taxableIncome = ((firstBracketsDetails.getMaxIncomeSingle() +
+                        firstBracketsDetails.getMinIncomeSingle()) / 2.0);
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = taxableIncome -
+                        firstBracketsDetails.getMinIncomeSingle();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.SINGLE, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.MARRIED_FILING_JOINTLY, FilingStatus.SURVIVING_SPOUSE:
+                // Make it so the taxable income exceeds is in the middle of the bracket
+                taxableIncome = ((firstBracketsDetails.getMaxIncomeMFJ() +
+                        firstBracketsDetails.getMinIncomeMFJ()) / 2.0);
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = taxableIncome -
+                        firstBracketsDetails.getMinIncomeMFJ();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.MARRIED_FILING_JOINTLY, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.MARRIED_FILING_SEPARATELY:
+                // Make it so the taxable income exceeds is in the middle of the bracket
+                taxableIncome = ((firstBracketsDetails.getMaxIncomeMFS() +
+                        firstBracketsDetails.getMinIncomeMFS()) / 2.0);
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = taxableIncome -
+                        firstBracketsDetails.getMinIncomeMFS();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.MARRIED_FILING_SEPARATELY, firstBracketsDetails, taxableIncome);
+                break;
+
+            case FilingStatus.HEAD_OF_HOUSEHOLD:
+                // Make it so the taxable income exceeds is in the middle of the bracket
+                taxableIncome = ((firstBracketsDetails.getMaxIncomeHOH() +
+                        firstBracketsDetails.getMinIncomeHOH()) / 2.0);
+
+                // Compute the expected taxable income for bracket
+                expectedTaxableIncomeForBracket = taxableIncome -
+                        firstBracketsDetails.getMinIncomeHOH();
+
+                // Call the method under test
+                actualTaxableIncomeForBracket = taxCalculationService.getApplicableIncomeForBracket(
+                        FilingStatus.HEAD_OF_HOUSEHOLD, firstBracketsDetails, taxableIncome);
+                break;
+        }
+
+        assertEquals(expectedTaxableIncomeForBracket, actualTaxableIncomeForBracket);
+    }
+
     /**
      * Supplies the expected tax years, derived directly from the mocked standard deduction details.
      */
