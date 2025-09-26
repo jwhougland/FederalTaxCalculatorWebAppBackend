@@ -5,9 +5,9 @@ import com.jack.tax.models.FilingStatus;
 import com.jack.tax.models.StandardDeductionDetails;
 import com.jack.tax.models.TaxYearDetails;
 import com.jack.tax.models.interfaces.InputModel;
+import com.jack.tax.models.interfaces.OutputModel;
 import com.jack.tax.repositories.BracketRepository;
 import com.jack.tax.repositories.StandardDeductionRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -501,6 +501,62 @@ public class TaxCalculationServiceTests {
         }
 
         assertEquals(expectedTaxableIncomeForBracket, actualTaxableIncomeForBracket);
+    }
+
+    /**
+     * Verifies the expected output tax model is returned.
+     *
+     * @param taxYear               Tax year
+     * @param grossIncome           Income before taxes (USD)
+     * @param totalDeductions       Total deductions (USD)
+     * @param filingStatus          Filing status
+     * @param expectedTaxableIncome Expected taxable income (USD)
+     */
+    @ParameterizedTest
+    @CsvSource({
+            // taxYear, grossIncome, totalDeductions, filingStatus, federal tax owed, marginal tax rate, effective tax rate, take home pay
+            "2024, 50000, 10000, SINGLE, 4015.88, 12, 8.03, 45984.12",  // Standard deduction is better
+            "2024, 50000, 20000, SINGLE, 3367.88, 12, 6.74, 46632.12",  // Itemizing is better
+            "2024, 10000, 5000, SINGLE, 0.0, 10, 0.0, 10000.00",        // Gross income less than standard deduction
+            "2024, 10000, 15000, SINGLE, 0, 10, 0.0, 10000.00",         // Gross income minus deductions less than 0
+            "2025, 60000, 20000, SINGLE, 4561.38, 12, 7.6, 55438.62",   // Standard deduction is better
+            "2025, 50000, 40000, SINGLE, 1000, 10, 2.0, 49000.0"        // Itemizing is better
+    })
+    public void calculateTaxes_expectedOutputModelReturned(int taxYear,
+                                                           double grossIncome,
+                                                           double totalDeductions,
+                                                           FilingStatus filingStatus,
+                                                           double expectedFederalTaxOwed,
+                                                           int expectedMarginalTaxRate,
+                                                           double expectedEffectiveTaxRate,
+                                                           double expectedTakeHomePay) {
+
+        // Mock the behavior of the standard deductions repository
+        when(mockitoStandardDeductionRepository.findAll())
+                .thenReturn(createMockedStandardDeductionDetails());
+
+        // Mock the behavior of the bracket details repository
+        when(mockitoBracketRepository.findAll())
+                .thenReturn(createMockedBracketDetails());
+
+        // Create an input model that will be provided as an input to the method under test
+        InputModel inputModel = new com.jack.tax.models.InputModel();
+        inputModel.setSelectedTaxYear(taxYear);
+        inputModel.setGrossIncome(grossIncome);
+        inputModel.setTotalDeductions(totalDeductions);
+        inputModel.setSelectedFilingStatus(filingStatus);
+
+        // Create an instance of the class under test
+        TaxCalculationService taxCalculationService = createTaxCalculationServiceWithMockedDependencies();
+
+        // Call the method under test
+        OutputModel actualOutputModel = taxCalculationService.calculateTaxes(inputModel);
+
+        // Check the outputs
+        assertEquals(expectedFederalTaxOwed, actualOutputModel.getFederalTaxOwed(), 1e-2);
+        assertEquals(expectedMarginalTaxRate, actualOutputModel.getMarginalTaxRate());
+        assertEquals(expectedEffectiveTaxRate, actualOutputModel.getEffectiveTaxRate(), 1e-2);
+        assertEquals(expectedTakeHomePay, actualOutputModel.getTakeHomePay(), 1e-2);
     }
 
     /**
